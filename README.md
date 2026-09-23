@@ -1,4 +1,4 @@
-# prophet_mega (minimal)
+# prophet_extra
 
 Trains standard Prophet on drug-response and CRISPR-fitness data, then
 reports per-intervention accuracy. Three files:
