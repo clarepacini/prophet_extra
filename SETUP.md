@@ -63,7 +63,7 @@ and a copy of whatever `test_predictions.csv` your training run produced. The sc
 
 ## 5. Example run: the two scripts directly
 
-This is an example command using custom embeddings. The default size is 512 but if your embedding is a different size, pass this with -standard-cl-dim. This example is using a skewness filter for including genes from the SCORE data (minimum-gene-absolute-skewness) and genes-per-skewness-bin. It is also using weights for observations during training, through the three inverse parameters. 
+This is an example command using custom embedding for the models. This embedding has joint training for expression data using cell lines and organoids and contains mutation embeddings. The default size is 512 but if your embedding is a different size, pass this with -standard-cl-dim. This example is using a skewness filter for including genes from the SCORE data (minimum-gene-absolute-skewness) and genes-per-skewness-bin. It is also using weights for observations during training, through the three inverse parameters. 
 
 ```bash
 source prophet_env/bin/activate
