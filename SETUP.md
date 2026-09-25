@@ -14,28 +14,16 @@ next to this folder (or anywhere importable from your Python environment):
 ```
 new_project/
 ├── prophet/           <- clone this
-└── prophet_mega/       <- this package
+└── prophet_extra/       <- this package
 ```
 
 ```bash
 cd new_project
-git clone <prophet-repo-url> prophet
+git clone https://github.com/theislab/prophet.git
 python3 -m venv prophet_env
 source prophet_env/bin/activate
 pip install -e ./prophet
 ```
-
-**You almost certainly do not need the local-training patch.**
-`train_standard_prophet.py` only imports `PhenotypeDataset`
-(`prophet.data.dataset`), `TransformerPredictor`
-(`prophet.models.transformer`), and `compute_hit_ratio`
-(`prophet.utils.callbacks`) — confirmed directly from its import block and
-from reading `transformer.py` itself. The patch that ships with the
-original `context_graph_model` repo (`prophet_local_training.patch`) only
-touches `prophet/core/prophet.py`, `prophet/data/dataloader.py`, and
-`prophet/training/trainer.py` — none of which this script touches. That
-patch is only relevant if you're also using the `Prophet`/`ProphetTrainer`
-wrapper classes directly (the "original Prophet" track), not this script.
 
 ## 2. Install the remaining Python dependencies
 
@@ -59,11 +47,7 @@ None of these are included in this package. You need:
 | `--standard-cl-embeddings` | Cell-line embedding CSV, indexed by cell-line ID. Same relationship: this package validates/passes it through, `PhenotypeDataset` does the actual per-row lookup. |
 | `--gene-skewness-path` / `--drug-skewness-path` | Only needed if using `--genes-per-skewness-bin`, `--minimum-gene-absolute-skewness`, `--maximum-drug-skewness`, `--minimum-drug-absolute-skewness`, or the post-hoc skewness-bin metrics (on by default; pass `--skip-skewness-bin-metrics` to turn them off). |
 
-If you're coming from the original `context_graph_model` repo, these are
-produced by `prepare_gdsc2_drug_inputs.py`, `prepare_score2_for_prophet.py`,
-`prepare_organoid_drug_for_prophet.py`, and the `build_*_embeddings.py`
-scripts — copy over whichever of those you still need, or regenerate the
-same file shapes yourself.
+You are able to use your own embeddings by changing the --iv-embeddings for interventions and --standard-cl-embeddings for model embeddings. 
 
 ## 4. Per-intervention metrics: lighter environment option
 
@@ -75,9 +59,11 @@ step to a collaborator without the full training setup, they only need:
 pip install pandas numpy scipy scikit-learn
 ```
 
-and a copy of whatever `test_predictions.csv` your training run produced.
+and a copy of whatever `test_predictions.csv` your training run produced. The script generated the per-intervention, as opposed to global intervention statistics from the prophet run. These are useful for assessing model performance and more informative than global statistics alone.
 
 ## 5. Example run: the two scripts directly
+
+This is an example command using custom embeddings. The default size is 512 but if your embedding is a different size, pass this with -standard-cl-dim. This example is using a skewness filter for including genes from the SCORE data (minimum-gene-absolute-skewness) and genes-per-skewness-bin. It is also using weights for observations during training, through the three inverse parameters. 
 
 ```bash
 source prophet_env/bin/activate
@@ -85,8 +71,6 @@ source prophet_env/bin/activate
 python3 train_standard_prophet.py \
   --prophet-data prophet_assets/datasets/GDSC2_dataset_prophet.csv \
                  prophet_assets/datasets/SCORE2_dataset.csv \
-                 prophet_assets/datasets/ORGANOID_DRUG_dataset_prophet.csv \
-                 prophet_assets/datasets/ORGANOID_SCORE_dataset.csv \
   --iv-embeddings prophet_assets/embeddings/iv_embeddings.csv \
   --standard-cl-embeddings prophet_assets/embeddings/joint_cl_org_prophet_embeddings/rank_corrected_joint_novel_edges_progeny14_expression512__plus_mutation_gat_mean300.csv \
   --standard-cl-dim 812 \
@@ -96,7 +80,6 @@ python3 train_standard_prophet.py \
   --inverse-response-weighted-mse \
   --inverse-response-epsilon 0.05 \
   --inverse-response-max-weight 20.0 \
-  --maximum-drug-skewness 0.3 \
   --output-dir results/standard_prophet/CLOrgrank_skew15_inverse_mse_drug03_with_organoid
 
 python3 per_intervention_metrics.py \
@@ -132,7 +115,6 @@ PROPHET_GENE_SUBSET_SEED=2024 \
 INVERSE_RESPONSE_WEIGHTED_MSE=1 \
 INVERSE_RESPONSE_EPSILON=0.05 \
 INVERSE_RESPONSE_MAX_WEIGHT=20.0 \
-PROPHET_MAX_DRUG_SKEWNESS=0.3 \
 OUTPUT_DIR=results/standard_prophet/CLOrgrank_skew15_inverse_mse_drug03_with_organoid \
 bash run_standard_prophet.sh
 ```
