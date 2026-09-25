@@ -64,7 +64,7 @@ and a copy of whatever `test_predictions.csv` your training run produced. The sc
 
 ## 5. Example run: the two scripts directly
 
-This command shows is an example using a custom, not definitive, embedding for the models. The embedding has  expression data using cell lines and contains mutation embeddings. The default size is 512 but if your embedding is a different size, pass this with -standard-cl-dim. This example is using a skewness filter for including genes from the SCORE data (minimum-gene-absolute-skewness) and genes-per-skewness-bin. It is also using weights for observations during training, through the three inverse parameters. 
+This command shows is an example using a custom, not definitive, embedding for the models. The embedding has  expression data using cell lines and contains mutation embeddings. The default size is 512 but if your embedding is a different size, pass this with -standard-cl-dim. The intervention embeddings are those shipped with prophet. This example is using a skewness filter for including genes from the SCORE data (minimum-gene-absolute-skewness) and genes-per-skewness-bin. It is also using weights for observations during training, through the three inverse parameters. 
 
 ```bash
 source prophet_env/bin/activate
@@ -72,7 +72,7 @@ source prophet_env/bin/activate
 python3 train_standard_prophet.py \
   --prophet-data prophet_extra_inputs/GDSC2_dataset_prophet.csv \
                  prophet_extra_inputs/SCORE2_dataset.csv \
-  --iv-embeddings prophet_extra_inputs/iv_embeddings.csv \
+  --iv-embeddings prophet_extra_inputs/global_iv_scaledv3.csv \
   --standard-cl-embeddings prophet_extra_inputs/cmp_residual_gated_graph_all64_native512_zscore__plus_tcga_gat_mean300.csv \
   --standard-cl-dim 512 \
   --minimum-gene-absolute-skewness 1.5 \
@@ -105,7 +105,7 @@ source prophet_env/bin/activate
 
 PROPHET_GDSC_DATA=prophet_extra_inputs/GDSC2_dataset_prophet.csv \
 PROPHET_AUXILIARY_DATA=prophet_extra_inputs/SCORE2_dataset.csv \
-IV_EMBEDDINGS=prophet_extra_inputs/iv_embeddings.csv \
+IV_EMBEDDINGS=prophet_extra_inputs/global_iv_scaledv3.csv \
 STANDARD_CL_EMBEDDINGS=**prophet_assets/embeddings/joint_cl_org_prophet_embeddings/rank_corrected_joint_novel_edges_progeny14_expression512__plus_mutation_gat_mean300.csv** \
 STANDARD_CL_DIM=512 \
 PROPHET_MIN_GENE_ABS_SKEWNESS=1.5 \
