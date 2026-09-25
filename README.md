@@ -9,12 +9,13 @@ reports per-intervention accuracy. Three files:
 | `per_intervention_metrics.py` | Standalone, run after training: turns `test_predictions.csv` into one row of R²/correlation per intervention. |
 | `run_standard_prophet.sh` | Env-var-driven wrapper: assembles input paths, runs the two scripts above in sequence. |
 
-## What Prophet itself already does
+## What Prophet extra does
 
-It's worth being clear about the division of labour, because most of the
-actual modelling is not in this package at all — it's in the `prophet`
-package (Theis lab), specifically two classes this package imports and
-uses as-is, unmodified:
+These are wrapper and helper functions to use the prophet trainer. The functions
+are used for pre-training data selection, passing observation weights and per-intervention
+analysis of the results from prophet. The modelling is done using the prophet package
+(Theis lab), specifically two classes this package imports and uses as-is, 
+from prophet unmodified:
 
 - **`PhenotypeDataset`** (`prophet.data.dataset`) — given a dataframe of
   rows plus an intervention-embedding table and a cell-line-embedding
@@ -37,8 +38,7 @@ uses as-is, unmodified:
   `response_weight` to be present on the right batches, which it does via
   `ResponseWeightedDataset` (see below).
 
-So `train_standard_prophet.py` isn't a from-scratch trainer — it's
-plumbing and bookkeeping *around* those two classes:
+So `train_standard_prophet.py` is working *around* those two classes:
 
 1. **Data assembly**: reads one or more Prophet-format CSVs
    (`--prophet-data`), restricts rows to cell lines present in your
@@ -71,9 +71,7 @@ plumbing and bookkeeping *around* those two classes:
    from the raw predictions, using `compute_hit_ratio` (the one utility
    function it does borrow from `prophet.utils.callbacks`).
 
-In short: if you're trying to understand what actually predicts a value,
-look in `prophet`. If you're trying to understand what data reached the
-model and how, or what's reported afterwards, look here.
+
 
 ## Downstream: per-intervention metrics
 
