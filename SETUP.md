@@ -4,7 +4,8 @@ This package has three files (see `README.md` for what each does):
 `train_standard_prophet.py`, `per_intervention_metrics.py`,
 `run_standard_prophet.sh`. It depends on the `prophet` package (Theis
 lab) for training, but `per_intervention_metrics.py` can run in a much
-lighter environment on its own — see §4.
+lighter environment on its own — see §4. There is data available in this google drive folder:
+https://drive.google.com/drive/folders/1GcWsosTeWTZXuur3RFjI9MZO2vRooqi2?usp=sharing
 
 ## 1. Clone and install `prophet`
 
@@ -63,28 +64,28 @@ and a copy of whatever `test_predictions.csv` your training run produced. The sc
 
 ## 5. Example run: the two scripts directly
 
-This is an example command using custom embedding for the models. This embedding has joint training for expression data using cell lines and organoids and contains mutation embeddings. The default size is 512 but if your embedding is a different size, pass this with -standard-cl-dim. This example is using a skewness filter for including genes from the SCORE data (minimum-gene-absolute-skewness) and genes-per-skewness-bin. It is also using weights for observations during training, through the three inverse parameters. 
+This command shows is an example using a custom, not definitive, embedding for the models. The embedding has  expression data using cell lines and contains mutation embeddings. The default size is 512 but if your embedding is a different size, pass this with -standard-cl-dim. This example is using a skewness filter for including genes from the SCORE data (minimum-gene-absolute-skewness) and genes-per-skewness-bin. It is also using weights for observations during training, through the three inverse parameters. 
 
 ```bash
 source prophet_env/bin/activate
 
 python3 train_standard_prophet.py \
-  --prophet-data prophet_assets/datasets/GDSC2_dataset_prophet.csv \
-                 prophet_assets/datasets/SCORE2_dataset.csv \
-  --iv-embeddings prophet_assets/embeddings/iv_embeddings.csv \
-  --standard-cl-embeddings prophet_assets/embeddings/joint_cl_org_prophet_embeddings/rank_corrected_joint_novel_edges_progeny14_expression512__plus_mutation_gat_mean300.csv \
-  --standard-cl-dim 812 \
+  --prophet-data prophet_extra_inputs/GDSC2_dataset_prophet.csv \
+                 prophet_extra_inputs/SCORE2_dataset.csv \
+  --iv-embeddings prophet_extra_inputs/iv_embeddings.csv \
+  --standard-cl-embeddings prophet_extra_inputs/cmp_residual_gated_graph_all64_native512_zscore__plus_tcga_gat_mean300.csv \
+  --standard-cl-dim 512 \
   --minimum-gene-absolute-skewness 1.5 \
   --genes-per-skewness-bin 500 \
   --gene-subset-seed 2024 \
   --inverse-response-weighted-mse \
   --inverse-response-epsilon 0.05 \
   --inverse-response-max-weight 20.0 \
-  --output-dir results/standard_prophet/CLOrgrank_skew15_inverse_mse_drug03_with_organoid
+  --output-dir results/standard_prophet/CL_skew15_inverse_mse
 
 python3 per_intervention_metrics.py \
-  --predictions results/standard_prophet/CLOrgrank_skew15_inverse_mse_drug03_with_organoid/test_predictions.csv \
-  --output-dir results/standard_prophet/CLOrgrank_skew15_inverse_mse_drug03_with_organoid
+  --predictions results/standard_prophet/CL_skew15_inverse_mse/test_predictions.csv \
+  --output-dir results/standard_prophet/CL_skew15_inverse_mse
 ```
 
 Run `python3 train_standard_prophet.py --help` or
@@ -102,20 +103,18 @@ mode now) and `--drug-targets` (unused by standard Prophet):
 ```bash
 source prophet_env/bin/activate
 
-PROPHET_GDSC_DATA=prophet_assets/datasets/GDSC2_dataset_prophet.csv \
-PROPHET_AUXILIARY_DATA=prophet_assets/datasets/SCORE2_dataset.csv \
-PROPHET_ORGANOID_DRUG_DATA=prophet_assets/datasets/ORGANOID_DRUG_dataset_prophet.csv \
-PROPHET_ORGANOID_CRISPR_DATA=prophet_assets/datasets/ORGANOID_SCORE_dataset.csv \
-IV_EMBEDDINGS=prophet_assets/embeddings/iv_embeddings.csv \
-STANDARD_CL_EMBEDDINGS=prophet_assets/embeddings/joint_cl_org_prophet_embeddings/rank_corrected_joint_novel_edges_progeny14_expression512__plus_mutation_gat_mean300.csv \
-STANDARD_CL_DIM=812 \
+PROPHET_GDSC_DATA=prophet_extra_inputs/GDSC2_dataset_prophet.csv \
+PROPHET_AUXILIARY_DATA=prophet_extra_inputs/SCORE2_dataset.csv \
+IV_EMBEDDINGS=prophet_extra_inputs/iv_embeddings.csv \
+STANDARD_CL_EMBEDDINGS=**prophet_assets/embeddings/joint_cl_org_prophet_embeddings/rank_corrected_joint_novel_edges_progeny14_expression512__plus_mutation_gat_mean300.csv** \
+STANDARD_CL_DIM=512 \
 PROPHET_MIN_GENE_ABS_SKEWNESS=1.5 \
 PROPHET_GENES_PER_SKEWNESS_BIN=500 \
 PROPHET_GENE_SUBSET_SEED=2024 \
 INVERSE_RESPONSE_WEIGHTED_MSE=1 \
 INVERSE_RESPONSE_EPSILON=0.05 \
 INVERSE_RESPONSE_MAX_WEIGHT=20.0 \
-OUTPUT_DIR=results/standard_prophet/CLOrgrank_skew15_inverse_mse_drug03_with_organoid \
+OUTPUT_DIR=results/standard_prophet/CL_skew15_inverse_mse \
 bash run_standard_prophet.sh
 ```
 
